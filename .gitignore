@@ -2,6 +2,7 @@
 *.slo
 *.lo
 *.o
+*.out
 
 # Compiled Dynamic libraries
 *.so
@@ -11,3 +12,7 @@
 *.lai
 *.la
 *.a
+
+# vim's YouCompleteMe artifatcts and scripts
+.ycm_extra_conf.py
+.ycm_extra_conf.pyc
