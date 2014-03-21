@@ -1,8 +1,8 @@
 # Makefile
 CC=g++
-CFLAGS=-I. -std=c++11 -Werror -Wall 
+CFLAGS=-I. -std=c++11 -Werror -Wall -g -ggdb -O3
 
 all: main.cpp 
-	$(CC) main.cpp $(CFLAGS)
+	$(CC) -o cluster_process main.cpp $(CFLAGS)
 clean:
-	rm simpleCross
+	rm cluster_process
