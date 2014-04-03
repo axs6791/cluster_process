@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <deque>
+#include "generator.hpp"
 
 #define PRINT(msg) std::cout<<msg<<std::endl; 
 #define PRINT_COLL(coll)            \
@@ -15,20 +16,21 @@
 // Some constants
 const unsigned LENGTH = 500;
 const unsigned POINTS = 500;
-typedef unsigned point_t;
+//typedef unsigned point_t;
 typedef std::deque<point_t> Cluster;
 typedef std::vector<Cluster> Processes;
 
 //int main(int argc, char **argv)
 int main()
 {
+    ClusterGenerator::Uniform rnd(0, LENGTH);
     std::default_random_engine generator;
     std::uniform_int_distribution<point_t> distribution(0, LENGTH);
     auto poissonEngine = std::bind ( distribution, generator );
 
     // generate some points
     std::vector<point_t> points(POINTS);
-    std::generate(points.begin(), points.end(), [&](){return poissonEngine(0,500);});
+    std::generate(points.begin(), points.end(), [&](){return rnd();});
   
     PRINT("Generating clusters");
 
@@ -44,7 +46,7 @@ int main()
             // generate each cluster here.
             // this is sorted by genereating random deltas
             // between each point.
-            newPoint += poissonEngine(1, 250);
+            newPoint += rnd(1, 250);
             if(newPoint > LENGTH) inRange = false;
             else                  newCluster.push_back(newPoint);   
         }
