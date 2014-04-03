@@ -12,6 +12,7 @@
 #include <random>
 #include <algorithm>
 
+//typedef unsigned point_t;
 typedef unsigned point_t;
 
 namespace ClusterGenerator
@@ -32,7 +33,7 @@ public:
     {
         std::default_random_engine engine;
         std::uniform_int_distribution<point_t> distribution(lower_bound, upper_bound);
-        std::function<point_t()> poissonEngine = std::bind ( distribution, engine );
+        _generator = std::bind ( distribution, engine );
     }
     
     ~Uniform() override = default;

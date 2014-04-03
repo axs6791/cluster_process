@@ -3,18 +3,18 @@
 #include <algorithm>
 #include <vector>
 #include <deque>
-#include "generator.hpp"
 
 #define PRINT(msg) std::cout<<msg<<std::endl; 
 #define PRINT_COLL(coll)            \
     for(auto val : coll)            \
     {                               \
-        std::cout<<val << " ";             \
+        std::cout<<val << " ";      \
     }                               \
     std::cout<<std::endl;
 
+#include "generator.hpp"
 // Some constants
-const unsigned LENGTH = 500;
+const unsigned LENGTH = 5000;
 const unsigned POINTS = 500;
 //typedef unsigned point_t;
 typedef std::deque<point_t> Cluster;
@@ -23,14 +23,16 @@ typedef std::vector<Cluster> Processes;
 //int main(int argc, char **argv)
 int main()
 {
-    ClusterGenerator::Uniform rnd(0, LENGTH);
-    std::default_random_engine generator;
-    std::uniform_int_distribution<point_t> distribution(0, LENGTH);
-    auto poissonEngine = std::bind ( distribution, generator );
+    // generaters the cluster seeds
+    ClusterGenerator::Uniform point_gtor(0, LENGTH);
+    // generatores the cluster points 
+    ClusterGenerator::Uniform cluster_gtor(1, LENGTH/2);
+    // determines the maximum number of points in the cluster
+    ClusterGenerator::Uniform range_gtor(1, LENGTH);
 
     // generate some points
     std::vector<point_t> points(POINTS);
-    std::generate(points.begin(), points.end(), [&](){return rnd();});
+    std::generate(points.begin(), points.end(), [&](){return point_gtor();});
   
     PRINT("Generating clusters");
 
@@ -39,6 +41,7 @@ int main()
     for(auto & point: points)
     {
         bool inRange = true;
+        unsigned ptCt = 0, maxCt = range_gtor();
         auto newPoint = point;
         Cluster newCluster = {point};
         while(inRange)
@@ -46,9 +49,11 @@ int main()
             // generate each cluster here.
             // this is sorted by genereating random deltas
             // between each point.
-            newPoint += rnd(1, 250);
-            if(newPoint > LENGTH) inRange = false;
-            else                  newCluster.push_back(newPoint);   
+            //newPoint += poissonEngine(1, 250);
+            newPoint += cluster_gtor();
+            if(newPoint > LENGTH || ++ptCt > maxCt)
+                inRange = false;  
+            else newCluster.push_back(newPoint);   
         }
         PRINT_COLL(newCluster);
         
