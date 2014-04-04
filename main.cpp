@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <deque>
+#include <boost/program_options.hpp>
 
 #define PRINT(msg) std::cout<<msg<<std::endl; 
 #define PRINT_COLL(coll)            \
@@ -20,9 +21,24 @@ const unsigned POINTS = 500;
 typedef std::deque<point_t> Cluster;
 typedef std::vector<Cluster> Processes;
 
-//int main(int argc, char **argv)
-int main()
+namespace po = boost::program_options;
+
+int main(int , char **)
 {
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help", "produce help message");
+        //("length", po::value<int>(), "set cluster length");
+    //po::variables_map vm;
+    //po::store(po::parse_command_line(argc, argv, desc), vm);
+    //po::notify(vm);
+
+    //if(vm.count("help"))
+    //{
+    //    std::cout << desc << std::endl;
+    //    return 1;
+    //}
+
     // generaters the cluster seeds
     ClusterGenerator::Uniform point_gtor(0, LENGTH);
     // generatores the cluster points 
@@ -84,9 +100,6 @@ int main()
         std::pop_heap(processes.begin() , processes.end(), Comp);
         auto & cluster = processes.back(); 
        
-        PRINT("//TopCluster//") 
-        PRINT_COLL(cluster); 
-
         if(!cluster.empty())
         {
             result.push_back(cluster.front());
@@ -104,4 +117,3 @@ int main()
     
     return 0;
 }
-
