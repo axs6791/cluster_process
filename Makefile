@@ -3,7 +3,8 @@ PROGRAM=cluster_process
 SOURCES=$(wildcard *.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
 CC=g++
-LDFLAGS=-lboost_program_options
+# LDFLAGS=-lboost_program_options
+LDFLAGS=
 CFLAGS=-I. -std=c++11 -Werror -Wall -g -ggdb -O3
 
 all: main.cpp $(PROGRAM)
