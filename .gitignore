@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.out
+cluster_process
 
 # Compiled Dynamic libraries
 *.so
