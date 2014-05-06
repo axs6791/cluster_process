@@ -127,7 +127,6 @@ int main(int , char **)
 
         Cluster newCluster;
         newCluster._fileName = "file"+std::to_string(fileIndex++)+".txt";
-        //PRINT(newCluster._fileName + " for point " + std::to_string(point));
         newCluster._stream.reset(new std::fstream);
         auto & stream = *(newCluster._stream);
         stream.open(newCluster._fileName, std::fstream::out | std::fstream::binary);
