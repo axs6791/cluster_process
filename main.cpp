@@ -1,12 +1,29 @@
+/**
+ * @file main.cpp
+ * @Brief Cluster generator implementation  
+ * @author Alfredo Santana
+ * @version 0.1
+ * @date 2014-05-06
+ * @notes see TODO comments for set of enhancements
+ *        to functionality and statbility.
+ */
+
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include <vector>
 #include <memory>
+#include <cassert>
+#include "generator.hpp"
 
-//#include <boost/program_options.hpp>
-
+/**
+ * @Brief Single line printing macro  
+ */
 #define PRINT(msg) std::cout<<msg<<std::endl; 
+/**
+ * @Brief Collection printing macro
+ * @Param coll is an std compatible collection
+ *        with elements that have ostream operators
+ */
 #define PRINT_COLL(coll)            \
     for(auto val : coll)            \
     {                               \
@@ -14,49 +31,73 @@
     }                               \
     std::cout<<std::endl;
 
+/**
+ * @name Constansts to be made into configuratble
+ *       values
+ * @{ */
 
-#include "generator.hpp"
+const unsigned LENGTH = 5000; /**Maximum point value*/
+const unsigned POINTS = 200;  /**Maximum number of seed points*/
+/**  @} */
 
-//TODO: All the file streams need to be handled
-// for exceptions.
-
-// Some constants
-const unsigned LENGTH = 5000;
-const unsigned POINTS = 500;
-
+ 
+/**
+ * @Brief This structure represents a cluster of points    
+ *        generated on a give distribution.
+ *        The points in the cluster are sorted (generated
+ *        that way) and are stored in a file. 
+  */
 struct Cluster
 {
-    std::string  _fileName = ""; 
+    std::string                   _fileName = "";
     std::shared_ptr<std::fstream> _stream;
-    point_t      _value = 0;
-    
+    point_t                       _value    = 0;
+
     Cluster() = default;
-    Cluster(Cluster const & data)
-        : _fileName(data._fileName)
-        , _value(data._value)
-    {}
-              
+    Cluster(Cluster const & src)
+        : _fileName(src._fileName)
+        , _stream(src._stream)
+        , _value(src._value)
+    {} 
+    Cluster & operator = (Cluster const & src)
+    {
+        _fileName = src._fileName;
+        _stream   = src._stream;
+        _value    = src._value;
+        return *this;
+    }
 };              
 
 typedef std::vector<Cluster> Processes;
 
-//namespace po = boost::program_options;
-
 int main(int , char **)
 {
-    //po::options_description desc("Allowed options");
-    //desc.add_options()
-    //    ("help", "produce help message");
-        //("length", po::value<int>(), "set cluster length");
-    //po::variables_map vm;
-    //po::store(po::parse_command_line(argc, argv, desc), vm);
-    //po::notify(vm);
+    ////////////////////////////////////////////////////
+    //
+    // TODO: Add here configuration functionality
+    // ------------------------------------------
+    //
+    //     //#include <boost/program_options.hpp>
+    //     //namespace po = boost::program_options;
+    //     //po::options_description desc("Allowed options");
+    //     //desc.add_options()
+    //     //    ("help", "produce help message");
+    //         //("length", po::value<int>(), "set cluster length");
+    //     //po::variables_map vm;
+    //     //po::store(po::parse_command_line(argc, argv, desc), vm);
+    //     //po::notify(vm);
+    // 
+    //     //if(vm.count("help"))
+    //     //{
+    //     //    std::cout << desc << std::endl;
+    //     //    return 1;
+    //     //}
+    // 
+    ////////////////////////////////////////////////////
 
-    //if(vm.count("help"))
-    //{
-    //    std::cout << desc << std::endl;
-    //    return 1;
-    //}
+    // Cunrrently there is a single generator implemented
+    // Next step is to provide a family of generators that
+    // represent Poisson, and Paretto distributions to start.
 
     // generator enngine the cluster seeds
     ClusterGenerator::Uniform point_gtor(0, LENGTH);
@@ -69,36 +110,42 @@ int main(int , char **)
     // generate some points
     std::vector<point_t> points(POINTS);
     std::generate(points.begin(), points.end(), [&] () {return point_gtor();});
-  
+ 
+    PRINT("Cluster points:");
+    PRINT_COLL(points);
     PRINT("Generating clusters");
 
     // for each point generate a cluster 
     Processes processes;
     for(auto & point: points)
     {
-        static int fileIndex = 0;
-        bool     inRange = true;
-        unsigned ptCt = 0, maxCt = range_gtor();
-        auto     newPoint = point;
+        static int fileIndex = 0;            // unique identifier for file names
+        bool       inRange   = true;         // controls that the cluster is stil in range
+        unsigned   ptCt      = 0;            // counter of points in the cluster
+        unsigned   maxCt     = range_gtor(); // maximum number of points in the cluster
+        auto       newPoint  = point;        // new cluster point
 
         Cluster newCluster;
         newCluster._fileName = "file"+std::to_string(fileIndex++)+".txt";
+        //PRINT(newCluster._fileName + " for point " + std::to_string(point));
         newCluster._stream.reset(new std::fstream);
         auto & stream = *(newCluster._stream);
-        stream.open(newCluster._fileName, std::fstream::in | std::fstream::binary);
+        stream.open(newCluster._fileName, std::fstream::out | std::fstream::binary);
         newCluster._value = point;
         while(inRange)
         {
-            // generate each cluster here.
-            // this is sorted by genereating random deltas
-            // between each point.
+            // each cluster is generated here.
+            // this is done in a sorted fashion by
+            // genereating random deltas between
+            // each point.
             newPoint += cluster_gtor();
             if(newPoint > LENGTH || ++ptCt > maxCt)
                 inRange = false;  
-            else stream << newPoint << std::endl;
+            else stream << newPoint <<  std::endl;
         }
         stream.close();
         processes.push_back(newCluster);
+        assert(processes.back()._value==point);
     }
 
     // sort all the data from all the clusters
@@ -117,30 +164,34 @@ int main(int , char **)
 
     std::make_heap(processes.begin() , processes.end(), Comp);
 
-    typedef std::ifstream Results;
+    typedef std::ofstream Results;
     Results result;
     result.open("Results.txt", std::fstream::out | std::fstream::binary);
     while(!processes.empty())
     {
         std::pop_heap(processes.begin() , processes.end(), Comp);
         auto & cluster = processes.back();
-        
+       
         if(!cluster._stream->is_open())
         {
-            cluster._stream->open(cluster._fileName, std::fstream::out | std::fstream::binary);
+            cluster._stream->open(cluster._fileName, std::fstream::in|std::fstream::binary);
         }
-            
-        *cluster._stream <<  cluster._value;       
-        result >> cluster._value;
-
-        // based on how clusters are distributed, there might be
-        // a better approach that poping and pushing in to the heap.
-        if (!cluster._stream->eof()) 
+        
+        result << std::to_string(cluster._value) << std::endl;
+        
+        if( *cluster._stream >> cluster._value )       
+        {
             std::push_heap(processes.begin(), processes.end(), Comp);
+        }
         else
-            // This cluster hace been fully process, so it can be
-            // removed.
+        {
+            if(system(("rm " + cluster._fileName).c_str()) != 0)
+            {
+                PRINT("Error removing cluster file" + cluster._fileName);
+            }
             processes.pop_back();
+            continue;
+        }
     }
 
     

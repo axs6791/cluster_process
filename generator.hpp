@@ -12,11 +12,13 @@
 #include <random>
 #include <algorithm>
 
-//typedef unsigned point_t;
 typedef unsigned point_t;
 
 namespace ClusterGenerator
 {
+/**
+ * @Brief Interface for all generetar classes  
+ */
 class Generator
 {
 public:
@@ -25,10 +27,18 @@ public:
     virtual point_t operator()() = 0;
 };
 
+/**
+ * @Brief Uniform distriburion generator 
+ */
 class Uniform : public Generator
 {
 public:
     
+    /**
+     * @Brief ctor
+     * @Param lower_bound defines the lower bound in the distribution
+     * @Param upper_bound defines the upper bound in the distribution
+     */
     Uniform(point_t lower_bound, point_t upper_bound) : Generator()
     {
         std::default_random_engine engine;
@@ -44,7 +54,7 @@ public:
     };
 
 private:
-    std::function<point_t()> _generator;
+    std::function<point_t()> _generator; /** bound generator object */
 };
 }
 
