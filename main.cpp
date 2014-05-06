@@ -66,7 +66,12 @@ struct Cluster
         _value    = src._value;
         return *this;
     }
-};              
+};
+
+/**
+ * @Brief Helper method to remove a file  
+ */
+void RemoveFile(std::string const & fileName);
 
 typedef std::vector<Cluster> Processes;
 
@@ -129,7 +134,21 @@ int main(int , char **)
         newCluster._fileName = "file"+std::to_string(fileIndex++)+".txt";
         newCluster._stream.reset(new std::fstream);
         auto & stream = *(newCluster._stream);
-        stream.open(newCluster._fileName, std::fstream::out | std::fstream::binary);
+
+        try
+        {
+            stream.open(newCluster._fileName, std::fstream::out | std::fstream::binary);
+        }
+        catch(std::exception const & e)
+        {
+            std::cerr << "Unable to create cluster file " << newCluster._fileName << std::endl;
+            for(auto const & cluster : processes)
+            {
+                RemoveFile(cluster._fileName);
+            }
+
+            return 1; 
+        }
         newCluster._value = point;
         while(inRange)
         {
@@ -165,7 +184,21 @@ int main(int , char **)
 
     typedef std::ofstream Results;
     Results result;
-    result.open("Results.txt", std::fstream::out | std::fstream::binary);
+    try
+    {
+        result.open("Results.txt", std::fstream::out | std::fstream::binary);
+    }
+    catch(std::exception const & e)
+    {
+        std::cerr << "Unable to create results file " << std::endl;
+        for(auto const & cluster : processes)
+        {
+            RemoveFile(cluster._fileName);
+        }
+
+        return 1; 
+    }
+
     while(!processes.empty())
     {
         std::pop_heap(processes.begin() , processes.end(), Comp);
@@ -173,7 +206,19 @@ int main(int , char **)
        
         if(!cluster._stream->is_open())
         {
-            cluster._stream->open(cluster._fileName, std::fstream::in|std::fstream::binary);
+            try{
+                cluster._stream->open(cluster._fileName, std::fstream::in|std::fstream::binary);
+            }
+            catch(std::exception const & e)
+            {
+                std::cerr << "Unable to open luster file " << cluster._fileName << std::endl;
+                for(auto const & cluster : processes)
+                {
+                    RemoveFile(cluster._fileName);
+                }
+
+                return 1; 
+            }
         }
         
         result << std::to_string(cluster._value) << std::endl;
@@ -184,6 +229,7 @@ int main(int , char **)
         }
         else
         {
+            cluster._stream->close();
             if(system(("rm " + cluster._fileName).c_str()) != 0)
             {
                 PRINT("Error removing cluster file" + cluster._fileName);
@@ -193,6 +239,15 @@ int main(int , char **)
         }
     }
 
+    result.close();
     
     return 0;
+}
+
+void RemoveFile(std::string const & fileName)
+{
+    if(system(("rm " + fileName).c_str()) != 0)
+    {
+        PRINT("Error removing cluster file" + fileName);
+    }
 }
