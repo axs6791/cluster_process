@@ -104,13 +104,17 @@ int main(int , char **)
     // Next step is to provide a family of generators that
     // represent Poisson, and Paretto distributions to start.
 
+    namespace unif = ClusterGenerator::Uniform;
     // generator enngine the cluster seeds
-    ClusterGenerator::Uniform point_gtor(0, LENGTH);
+    unif::Params params;
+    unif::Dist point_gtor(unif::Params(0,LENGTH));
+   
     // generator engine for the cluster points 
-    ClusterGenerator::Uniform cluster_gtor(1, LENGTH/2);
+    unif::Dist cluster_gtor(unif::Params(1, LENGTH/2));
+    
     // generator engine to determines the maximum
     // number of points in the cluster
-    ClusterGenerator::Uniform range_gtor(1, LENGTH);
+    unif::Dist range_gtor(unif::Params(1, LENGTH));
 
     // generate some points
     std::vector<point_t> points(POINTS);

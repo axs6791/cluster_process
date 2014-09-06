@@ -17,37 +17,65 @@ typedef unsigned point_t;
 namespace ClusterGenerator
 {
 /**
- * @Brief Interface for all generetar classes  
- */
+* @Brief Interface for genreator classes
+* @tparam PARAM is the configuration
+*         structure for the generator
+*/
+template<typename PARAM>
 class Generator
 {
 public:
-    Generator() = default;
+
+    typedef PARAM param_t;
+    /**
+     * @Brief  ctor
+     * @Param config is the 
+     */
+    Generator(param_t const & param)
+        : _param(param) {}
+
     virtual ~Generator() = default;
     virtual point_t operator()() = 0;
+    
+protected:
+    PARAM _param;
+};
+
+namespace Uniform
+{
+
+struct Params
+{
+    Params() = default;
+    Params(point_t lowerBound, point_t upperBound)
+        : _lb(lowerBound)
+        , _ub(upperBound)
+    {}
+
+    point_t _lb = 0;
+    point_t _ub = 0;
 };
 
 /**
  * @Brief Uniform distriburion generator 
  */
-class Uniform : public Generator
+class Dist : public Generator<Params>
 {
 public:
     
     /**
-     * @Brief ctor
-     * @Param lower_bound defines the lower bound in the distribution
-     * @Param upper_bound defines the upper bound in the distribution
+     * @Brief  ctor
+     * @Param param for the distribution
      */
-    Uniform(point_t lower_bound, point_t upper_bound) : Generator()
+    Dist(param_t const & params) : Generator(params)
     {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<point_t> distribution(lower_bound, upper_bound);
+        std::uniform_int_distribution<point_t> distribution(params._lb, params._ub);
         _generator = std::bind (distribution, gen);
     }
     
-    ~Uniform() override = default;
+    ~Dist() override = default;
     
     point_t operator()() override
     { 
@@ -57,6 +85,40 @@ public:
 private:
     std::function<point_t()> _generator; /** bound generator object */
 };
+}
+
+///**
+// * @Brief Uniform distriburion generator 
+// */
+//class Poisson: public Generator
+//{
+//public:
+//    
+//    /**
+//     * @Brief ctor
+//     * @Param lower_bound defines the lower bound in the distribution
+//     * @Param upper_bound defines the upper bound in the distribution
+//     */
+//    Poisson(point_t lower_bound, point_t upper_bound) : Generator()
+//    {
+//        typedef std::poisson_distribution<point_t> distribution_t;
+//        std::random_device rd;
+//        std::mt19937 gen(rd());
+//
+//        distribution_t::param distribution();
+//        _generator = std::bind (distribution, gen);
+//    }
+//    
+//    ~Poisson() override = default;
+//    
+//    point_t operator()() override
+//    { 
+//        return _generator(); 
+//    };
+//
+//private:
+//    std::function<point_t()> _generator; /** bound generator object */
+//};
 }
 
 #endif //__GENERATOR_HPP__
