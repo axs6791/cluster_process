@@ -1,6 +1,6 @@
 /**
  * @file generator.hpp
- * @Brief  
+ * @brief  
  * @author Alfredo Santana
  * @version 
  * @date 2014-04-03
@@ -17,7 +17,7 @@ typedef unsigned point_t;
 namespace ClusterGenerator
 {
 /**
-* @Brief Interface for genreator classes
+* @brief Interface for genreator classes
 * @tparam PARAM is the configuration
 *         structure for the generator
 */
@@ -28,8 +28,8 @@ public:
 
     typedef PARAM param_t;
     /**
-     * @Brief  ctor
-     * @Param config is the 
+     * @brief  ctor
+     * @param config is the 
      */
     Generator(param_t const & param)
         : _param(param) {}
@@ -57,15 +57,15 @@ struct Params
 };
 
 /**
- * @Brief Uniform distriburion generator 
+ * @brief Uniform distriburion generator 
  */
 class Dist : public Generator<Params>
 {
 public:
     
     /**
-     * @Brief  ctor
-     * @Param param for the distribution
+     * @brief  ctor
+     * @param params for the distribution
      */
     Dist(param_t const & params) : Generator(params)
     {
@@ -88,16 +88,16 @@ private:
 }
 
 ///**
-// * @Brief Uniform distriburion generator 
+// * @brief Uniform distriburion generator 
 // */
 //class Poisson: public Generator
 //{
 //public:
 //    
 //    /**
-//     * @Brief ctor
-//     * @Param lower_bound defines the lower bound in the distribution
-//     * @Param upper_bound defines the upper bound in the distribution
+//     * @brief ctor
+//     * @param lower_bound defines the lower bound in the distribution
+//     * @param upper_bound defines the upper bound in the distribution
 //     */
 //    Poisson(point_t lower_bound, point_t upper_bound) : Generator()
 //    {

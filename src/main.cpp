@@ -1,6 +1,6 @@
 /**
  * @file main.cpp
- * @Brief Cluster generator implementation  
+ * @brief Cluster generator implementation  
  * @author Alfredo Santana
  * @version 0.1
  * @date 2014-05-06
@@ -16,12 +16,12 @@
 #include "generator.hpp"
 
 /**
- * @Brief Single line printing macro  
+ * @brief Single line printing macro  
  */
 #define PRINT(msg) std::cout<<msg<<std::endl; 
 /**
- * @Brief Collection printing macro
- * @Param coll is an std compatible collection
+ * @brief Collection printing macro
+ * @param coll is an std compatible collection
  *        with elements that have ostream operators
  */
 #define PRINT_COLL(coll)            \
@@ -42,23 +42,36 @@ const unsigned POINTS = 200;  /**Maximum number of seed points*/
 
  
 /**
- * @Brief This structure represents a cluster of points    
+ * @brief This structure represents a cluster of points    
  *        generated on a give distribution.
  *        The points in the cluster are sorted (generated
  *        that way) and are stored in a file. 
   */
 struct Cluster
 {
-    std::string                   _fileName = "";
-    std::shared_ptr<std::fstream> _stream;
-    point_t                       _value    = 0;
+    
+    std::string                   _fileName = ""; /** Cluster file name */
+    std::shared_ptr<std::fstream> _stream;        /** File name for file */
+    point_t                       _value    = 0;  /** Current cluster point */
 
+    /**
+     * @brief  Ctor
+     */
     Cluster() = default;
+    /**
+     * @brief  Copy ctor
+     * @param src is the source cluster
+     */
     Cluster(Cluster const & src)
         : _fileName(src._fileName)
         , _stream(src._stream)
         , _value(src._value)
     {} 
+    /**
+     * @brief  Assignment operator
+     * @param src is the source cluster
+     * @returns reference to this opbject  
+     */
     Cluster & operator = (Cluster const & src)
     {
         _fileName = src._fileName;
@@ -69,7 +82,7 @@ struct Cluster
 };
 
 /**
- * @Brief Helper method to remove a file  
+ * @brief Helper method to remove a file  
  */
 void RemoveFile(std::string const & fileName);
 
@@ -248,6 +261,10 @@ int main(int , char **)
     return 0;
 }
 
+/**
+ * @brief  Helper function to clean up cluster files
+ * @param fileName
+ */
 void RemoveFile(std::string const & fileName)
 {
     if(system(("rm " + fileName).c_str()) != 0)
